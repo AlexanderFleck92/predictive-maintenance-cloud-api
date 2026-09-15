@@ -2,11 +2,11 @@ name: ML Pipeline & API Test
 
 on:
   push:
-    branches: [ main, master ] # Startet vollautomatisch bei jedem Upload
+    branches: [ main, master ]
 
 jobs:
   build-and-train:
-    runs-on: ubuntu-latest # Nutzt einen sauberen Linux-Server in der Cloud
+    runs-on: ubuntu-latest
 
     steps:
     - name: Code auschecken
@@ -15,13 +15,30 @@ jobs:
     - name: Python 3.11 einrichten
       uses: actions/setup-python@v5
       with:
-        python-version: '3.11' # Hier zwingen wir GitHub zu Python 3.11
+        python-version: '3.11'
 
     - name: Abhängigkeiten installieren
       run: |
         python -m pip install --upgrade pip
-        pip install -r requirements.txt
+        REQ_PATH=$(find . -name "requirements.txt" | head -n 1)
+        pip install -r "$REQ_PATH"
 
     - name: KI-Modell in der Cloud trainieren
       run: |
+        TRAIN_PATH=$(find . -name "train.py" | head -n 1)
+        PROJECT_DIR=$(dirname $(dirname "$TRAIN_PATH"))
+        cd "$PROJECT_DIR"
         python src/train.py
+
+    - name: Automatisierte Unit-Tests ausführen
+      env:
+        PYTHONPATH: .
+      run: |
+        SRC_DIR=$(find . -name "src" -type d | head -n 1)
+        PROJECT_DIR=$(dirname "$SRC_DIR")
+        cd "$PROJECT_DIR"
+        export PYTHONPATH=$PYTHONPATH:.
+        pytest
+
+
+
