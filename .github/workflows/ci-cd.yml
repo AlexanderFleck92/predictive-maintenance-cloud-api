@@ -1,0 +1,27 @@
+name: ML Pipeline & API Test
+
+on:
+  push:
+    branches: [ main, master ] # Startet vollautomatisch bei jedem Upload
+
+jobs:
+  build-and-train:
+    runs-on: ubuntu-latest # Nutzt einen sauberen Linux-Server in der Cloud
+
+    steps:
+    - name: Code auschecken
+      uses: actions/checkout@v4
+
+    - name: Python 3.11 einrichten
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11' # Hier zwingen wir GitHub zu Python 3.11
+
+    - name: Abhängigkeiten installieren
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: KI-Modell in der Cloud trainieren
+      run: |
+        python src/train.py
